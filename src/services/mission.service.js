@@ -7,6 +7,8 @@ import {
     checkAlreadyChallenged,
     insertUserMission
   } from "../repositories/userMission.repository.js";
+
+import { getMissionsByStoreId } from "../repositories/mission.repository.js";
   
   export const createMissionService = async (missionData) => {
     const exists = await checkStoreExists(missionData.storeId);
@@ -26,5 +28,17 @@ import {
     const userMissionId = await insertUserMission(userId, missionId);
     return { userMissionId };
   };
+
+  export const listStoreMissions = async (storeId) => {
+    const missions = await getMissionsByStoreId(storeId);
+    return missions.map((m) => ({
+      missionId: m.id,
+      content: m.content,
+      point: m.point,
+      isActive: m.isActive,
+      createdAt: m.createdAt.toISOString().split("T")[0]
+    }));
+  };
+  
 
   

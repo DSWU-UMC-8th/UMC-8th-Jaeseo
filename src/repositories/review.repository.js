@@ -1,4 +1,5 @@
 import { pool } from "../config/dbconfig.js";
+import prisma from "../config/dbconfig.js";
 
 export const checkStoreExists = async (storeId) => {
   const conn = await pool.getConnection();
@@ -44,3 +45,21 @@ export const insertReviewImages = async (reviewId, imageUrls) => {
     conn.release();
   }
 };
+
+export const getUserReviews = async (userId, cursor, take = 5) => {
+    return await prisma.review.findMany({
+      where: { userId },
+      include: {
+        store: {
+          select: { id: true, name: true }
+        },
+        images: {
+          select: { imageUrl: true }
+        }
+      },
+      orderBy: { id: "desc" },
+      take,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 })
+    });
+  };
+  

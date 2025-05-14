@@ -4,9 +4,11 @@ import cors from "cors";
 import {pool} from './config/dbconfig.js';
 import {handleUserSignUp} from "./controllers/user.controller.js";
 import {createStore} from "./controllers/store.controller.js";
-import {createReview} from "./controllers/review.controller.js";
+import {createReview, handleListUserReviews} from "./controllers/review.controller.js";
 import { createMission } from "./controllers/mission.controller.js";
 import { challengeMission } from "./controllers/mission.controller.js";
+import {handleListStoreReviews} from "./controllers/store.controller.js";
+import { handleListStoreMissions } from "./controllers/mission.controller.js";
 
 try {
   const conn = await pool.getConnection(); // 연결 시도
@@ -34,6 +36,15 @@ app.post("/api/stores",createStore);
 app.post("/api/stores/:storeId/reviews",createReview);
 app.post("/api/stores/:storeId/missions",createMission);
 app.post("/api/missions/:missionId/challenge", challengeMission);
+
+app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
+
+// 내가 쓴 리뷰 확인하는 API 
+app.get("/users/:userId/reviews", handleListUserReviews);
+app.get("/stores/:storeId/missions", handleListStoreMissions);
+// 특정 가게의 미션 조회해보는 API
+
+
 
 app.get("/", (req, res) => {
   res.send("Good Luck!");

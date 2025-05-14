@@ -1,5 +1,5 @@
 import { pool } from "../config/dbconfig.js";
-import prisma  from "../config/dbconfig.js";
+import  prisma  from "../config/dbconfig.js";
 
 
 // User 데이터 삽입
@@ -44,4 +44,22 @@ export const getUserPreferencesByUserId = async (userId) => {
   });
 
   return preferences;
+};
+
+export const getAllStoreReviews = async (storeId) => {
+  const reviews = await prisma.review.findMany({
+    select: {
+      id: true,
+      content: true,
+      storeId: true,
+      userId: true,
+      store: true,
+      user: true,
+    },
+    where: { storeId: storeId, id: { gt: cursor } },
+    orderBy: { id: "asc" },
+    take: 5,
+  });
+
+  return reviews;
 };

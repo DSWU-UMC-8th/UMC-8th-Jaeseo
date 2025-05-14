@@ -1,4 +1,5 @@
 import { pool } from "../config/dbconfig.js";
+import prisma from "../config/dbconfig.js";
 
 export const checkStoreExists = async (storeId) => {
   const conn = await pool.getConnection();
@@ -23,3 +24,22 @@ export const insertMission = async (data) => {
     conn.release();
   }
 };
+
+export const getMissionsByStoreId = async (storeId) => {
+    return await prisma.mission.findMany({
+      where: {
+        storeId: storeId,
+        isActive: true
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      select: {
+        id: true,
+        point: true,
+        content: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+  };
