@@ -62,4 +62,26 @@ export const getUserReviews = async (userId, cursor, take = 5) => {
       ...(cursor && { cursor: { id: cursor }, skip: 1 })
     });
   };
-  
+
+
+  export const createReviewWithImages = async (storeId, data) => {
+  const store = await prisma.store.findUnique({ where: { id: storeId } });
+  if (!store) return null;
+
+  const review = await prisma.review.create({
+    data: {
+      title: data.title,
+      content: data.content,
+      rating: data.rating,
+      store: { connect: { id: storeId } },
+      user: { connect: { id: data.userId } }, // 로그인한 사용자 ID
+      images: {
+        createMany: {
+          data: data.images?.map((url) => ({ imageUrl: url })) || []
+        }
+      }
+    }
+  });
+
+  return review;
+};

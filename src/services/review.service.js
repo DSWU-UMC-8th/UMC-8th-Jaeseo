@@ -4,18 +4,17 @@ import {
     insertReviewImages,
     getUserReviews
   } from "../repositories/review.repository.js";
+  import { ReviewStoreNotFoundError } from "../errors.js";
+  import { createReviewWithImages } from "../repositories/review.repository.js";
   
-  export const createReviewService = async (reviewData) => {
-    const exists = await checkStoreExists(reviewData.storeId);
-    if (!exists) throw new Error("존재하지 않는 가게입니다.");
+  export const createReviewService = async (storeId, data) => {
+    const result = await createReviewWithImages(storeId, data);
   
-    const reviewId = await insertReview(reviewData);
-  
-    if (reviewData.images.length > 0) {
-      await insertReviewImages(reviewId, reviewData.images);
+    if (!result) {
+      throw new ReviewStoreNotFoundError("해당 가게에 리뷰를 등록할 수 없습니다.", { storeId });
     }
   
-    return { reviewId };
+    return { reviewId: result.id };
   };
   
   export const listUserReviews = async (userId, cursor) => {

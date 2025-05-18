@@ -1,4 +1,5 @@
 import { pool } from "../config/dbconfig.js";
+import prisma from "../config/dbconfig.js";
 
 export const checkMissionExists = async (missionId) => {
   const conn = await pool.getConnection();
@@ -24,15 +25,14 @@ export const checkAlreadyChallenged = async (userId, missionId) => {
 };
 
 export const insertUserMission = async (userId, missionId) => {
-  const conn = await pool.getConnection();
-  try {
-    const [result] = await conn.query(
-      `INSERT INTO user_mission (user_id, mission_id, status)
-       VALUES (?, ?, 'in_progress')`,
-      [userId, missionId]
-    );
-    return result.insertId;
-  } finally {
-    conn.release();
-  }
+  const userMission = await prisma.userMission.create({
+    data: {
+      userId,
+      missionId,
+      status: "in_progress",
+    },
+  });
+
+  console.log("insertUserMission 반환값:", userMission); // ✅ 여기도 찍어보세요
+  return userMission;
 };

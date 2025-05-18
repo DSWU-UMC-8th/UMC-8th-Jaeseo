@@ -11,18 +11,20 @@ export const checkStoreExists = async (storeId) => {
   }
 };
 
-export const insertMission = async (data) => {
-  const conn = await pool.getConnection();
-  try {
-    const [result] = await conn.query(
-      `INSERT INTO mission (store_id, content, point, is_active)
-       VALUES (?, ?, ?, ?)`,
-      [data.storeId, data.content, data.point, data.isActive]
-    );
-    return result.insertId;
-  } finally {
-    conn.release();
-  }
+export const insertMission = async (storeId, data) => {
+  const store = await prisma.store.findUnique({ where: { id: storeId } });
+  if (!store) return null;
+
+  const mission = await prisma.mission.create({
+    data: {
+      storeId,
+      point: data.point,
+      content: data.content,
+      isActive: true,
+    },
+  });
+
+  return mission;
 };
 
 export const getMissionsByStoreId = async (storeId) => {
@@ -42,4 +44,29 @@ export const getMissionsByStoreId = async (storeId) => {
         createdAt: true
       }
     });
+  };
+
+export const isAlreadyChallenged = async (userId, missionId) => {
+    const existing = await prisma.userMission.findUnique({
+      where: {
+        userId_missionId: {
+          userId,
+          missionId,
+        },
+      },
+    });
+  
+    return !!existing;
+  };
+  
+export const insertUserMission = async (userId, missionId) => {
+    const userMission = await prisma.userMission.create({
+      data: {
+        userId,
+        missionId,
+        status: "in_progress", // 기본값
+      },
+    });
+    console.log("insertUserMission 반환값:", userMission); // ✅ 여기도 찍어보세요
+    return userMission;
   };

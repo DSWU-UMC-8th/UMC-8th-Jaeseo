@@ -1,5 +1,5 @@
 import {
-    checkStoreExists,
+    isAlreadyChallenged,
     insertMission
   } from "../repositories/mission.repository.js";
   import {
@@ -9,25 +9,33 @@ import {
   } from "../repositories/userMission.repository.js";
 
 import { getMissionsByStoreId } from "../repositories/mission.repository.js";
-  
-  export const createMissionService = async (missionData) => {
-    const exists = await checkStoreExists(missionData.storeId);
-    if (!exists) throw new Error("존재하지 않는 가게입니다.");
-  
-    const missionId = await insertMission(missionData);
-    return { missionId };
-  };
+import { StoreNotFoundError } from "../errors.js";
+import { DuplicateMissionChallengeError } from "../errors.js";
 
-  export const challengeMissionService = async (userId, missionId) => {
-    const missionExists = await checkMissionExists(missionId);
-    if (!missionExists) throw new Error("존재하지 않는 미션입니다.");
-  
-    const already = await checkAlreadyChallenged(userId, missionId);
-    if (already) throw new Error("이미 도전 중인 미션입니다.");
-  
-    const userMissionId = await insertUserMission(userId, missionId);
-    return { userMissionId };
-  };
+export const createMissionService = async (storeId, data) => {
+  const mission = await insertMission(storeId, data);
+
+  if (!mission) {
+    throw new StoreNotFoundError("존재하지 않는 가게입니다.", { storeId });
+  }
+
+  return { missionId: mission.id };
+};
+
+export const challengeMissionService = async (missionId, userId) => {
+  const already = await isAlreadyChallenged(userId, missionId);
+
+  if (already) {
+    throw new DuplicateMissionChallengeError("이미 도전 중인 미션입니다.", {
+      userId,
+      missionId,
+    });
+  }
+
+  const userMission = await insertUserMission(userId, missionId);
+
+  return { userMissionId: userMission.id };
+};
 
   export const listStoreMissions = async (storeId) => {
     const missions = await getMissionsByStoreId(storeId);
