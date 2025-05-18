@@ -1,7 +1,8 @@
 import {
     checkStoreExists,
     insertReview,
-    insertReviewImages
+    insertReviewImages,
+    getUserReviews
   } from "../repositories/review.repository.js";
   
   export const createReviewService = async (reviewData) => {
@@ -17,3 +18,18 @@ import {
     return { reviewId };
   };
   
+  export const listUserReviews = async (userId, cursor) => {
+    const reviews = await getUserReviews(userId, cursor);
+  
+    return {
+      reviews: reviews.map(r => ({
+        reviewId: r.id,
+        store: r.store,
+        rating: Number(r.rating),
+        content: r.content,
+        images: r.images.map(img => img.imageUrl),
+        createdAt: r.createdAt.toISOString().split("T")[0]
+      })),
+      nextCursor: reviews.length === 5 ? reviews[4].id : null
+    };
+  };

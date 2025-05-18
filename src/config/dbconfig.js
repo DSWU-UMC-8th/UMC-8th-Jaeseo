@@ -17,5 +17,5 @@ export const pool = mysql.createPool({
   queueLimit: 0, // getConnection에서 오류가 발생하기 전에 Pool에 대기할 요청의 개수 한도
 });
 
-const prisma=new PrismaClient();
+const prisma=new PrismaClient({log: ["query"]});
 export default prisma;

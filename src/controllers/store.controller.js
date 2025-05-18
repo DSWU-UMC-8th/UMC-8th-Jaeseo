@@ -1,5 +1,6 @@
 import { createStoreService } from "../services/store.service.js";
 import { bodyToStore } from "../dtos/store.dto.js";
+import {listStoreReviews} from "../services/store.service.js";
 
 export const createStore = async (req, res) => {
   try {
@@ -12,3 +13,10 @@ export const createStore = async (req, res) => {
     res.status(500).json({ message: "서버 오류" });
   }
 };
+
+export const handleListStoreReviews = async (req, res, next) => {
+    const reviews = await listStoreReviews(
+      req.params.storeId
+    );
+    res.status(StatusCodes.OK).json(reviews);
+  };
